@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanuit de Lucht - AeroDrone Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy: #020b1a;
+            --dark-blue: #041830;
+            --mid-blue: #0a3d6b;
+            --sky-blue: #1a7abf;
+            --light-blue: #5bc4f5;
+            --cloud-white: #daeeff;
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ========== NAVIGATION ========== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            backdrop-filter: blur(14px);
+            background: rgba(2, 11, 26, 0.6);
+            transition: background 0.3s ease;
+        }
+
+        nav.scrolled {
+            background: rgba(2, 11, 26, 0.95);
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .logo-accent {
+            color: var(--light-blue);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--light-blue);
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+            }
+        }
+
+        /* ========== ALTITUDE INDICATOR ========== */
+        .altitude-indicator {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .altitude-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            color: var(--light-blue);
+        }
+
+        .altitude-track {
+            width: 3px;
+            height: 140px;
+            background: rgba(91, 196, 245, 0.3);
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .altitude-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, var(--light-blue), var(--sky-blue));
+            border-radius: 2px;
+            transition: height 0.1s ease-out;
+        }
+
+        .altitude-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            color: var(--light-blue);
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .altitude-indicator {
+                display: none;
+            }
+        }
+
+        /* ========== HERO SECTION ========== */
+        #hero {
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--navy) 0%, var(--dark-blue) 100%);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 80px;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .cloud-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .cloud {
+            position: absolute;
+            opacity: 0.7;
+            filter: blur(3px);
+        }
+
+        .cloud-bump {
+            position: absolute;
+            background: var(--cloud-white);
+            border-radius: 50%;
+        }
+
+        @keyframes drift {
+            from { transform: translateX(-120%); }
+            to { transform: translateX(120vw); }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px rgba(91, 196, 245, 0.5);
+        }
+
+        .hero-subtitle {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            color: var(--light-blue);
+            margin-bottom: 3rem;
+            letter-spacing: 2px;
+        }
+
+        .drone-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            animation: droneFly 8s ease-in-out infinite;
+        }
+
+        @keyframes droneFly {
+            0%, 100% { transform: translateY(0) rotateZ(0deg); opacity: 1; }
+            50% { transform: translateY(-30px) rotateZ(2deg); opacity: 0.95; }
+        }
+
+        /* ========== ABOUT SECTION ========== */
+        #about {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #0a3d6b, #0d5490, #1a7abf);
+            padding: 100px 2rem;
+            position: relative;
+        }
+
+        section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .about-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(26, 122, 191, 0.3);
+            border: 1px solid rgba(91, 196, 245, 0.5);
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.7s ease;
+        }
+
+        .stat-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stat-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--light-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--cloud-white);
+        }
+
+        .drone-ring-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            position: relative;
+        }
+
+        .drone-ring {
+            width: 250px;
+            height: 250px;
+            border: 2px solid var(--light-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: spin 12s linear infinite;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.7s ease;
+        }
+
+        .drone-ring.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .drone-ring svg {
+            width: 120px;
+            height: 120px;
+            animation: spin 12s linear infinite reverse;
+        }
+
+        /* ========== SERVICES SECTION ========== */
+        #services {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1a7abf, #2a96d9, #5bc4f5);
+            padding: 100px 2rem;
+            position: relative;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background: rgba(26, 122, 191, 0.25);
+            border: 1px solid rgba(91, 196, 245, 0.4);
+            padding: 2rem;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.7s ease;
+        }
+
+        .service-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--light-blue);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .service-card p {
+            font-size: 0.95rem;
+            color: var(--cloud-white);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .about-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ========== PORTFOLIO SECTION ========== */
+        #portfolio {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #5bc4f5, #87ceeb, #b8e4f7);
+            padding: 100px 2rem;
+            position: relative;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .portfolio-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: rgba(26, 122, 191, 0.3);
+            border: 1px solid rgba(91, 196, 245, 0.4);
+            aspect-ratio: 1;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.7s ease;
+        }
+
+        .portfolio-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .portfolio-card:nth-child(1) {
+            grid-column: span 2;
+            aspect-ratio: 2/1;
+        }
+
+        .portfolio-card:nth-child(5) {
+            grid-column: span 2;
+            aspect-ratio: 2/1;
+        }
+
+        .portfolio-card svg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .portfolio-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(2, 11, 26, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .portfolio-card:hover .portfolio-overlay {
+            opacity: 1;
+        }
+
+        .portfolio-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .portfolio-category {
+            background: var(--light-blue);
+            color: var(--navy);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .portfolio-card:nth-child(1),
+            .portfolio-card:nth-child(5) {
+                grid-column: span 1;
+                aspect-ratio: 1;
+            }
+        }
+
+        /* ========== CONTACT SECTION ========== */
+        #contact {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #87ceeb, #b8e4f7, #daeeff);
+            padding: 100px 2rem;
+            position: relative;
+        }
+
+        .contact-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-form {
+            background: rgba(4, 24, 48, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 12px;
+            border: 1px solid rgba(91, 196, 245, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            color: var(--light-blue);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(91, 196, 245, 0.4);
+            background: rgba(10, 61, 107, 0.5);
+            color: #fff;
+            border-radius: 6px;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--light-blue);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--sky-blue), var(--light-blue));
+            color: var(--navy);
+            border: none;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(91, 196, 245, 0.4);
+        }
+
+        .submit-btn.success {
+            background: #4ade80;
+            color: #fff;
+        }
+
+        /* ========== FOOTER ========== */
+        footer {
+            background: var(--navy);
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(91, 196, 245, 0.2);
+        }
+
+        footer p {
+            font-size: 0.9rem;
+            color: var(--cloud-white);
+        }
+
+        /* ========== WAVE DIVIDERS ========== */
+        .wave {
+            width: 100%;
+            display: block;
+        }
+
+        /* ========== REVEAL ANIMATIONS ========== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ========== UTILITY ========== */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2rem;
+            }
+
+            .contact-form {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION -->
+    <nav id="navbar">
+        <div class="logo">Aero<span class="logo-accent">Drone</span></div>
+        <ul>
+            <li><a href="#about">Over ons</a></li>
+            <li><a href="#services">Diensten</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- ALTITUDE INDICATOR -->
+    <div class="altitude-indicator">
+        <div class="altitude-label">HOOGTE</div>
+        <div class="altitude-track">
+            <div class="altitude-fill"></div>
+        </div>
+        <div class="altitude-value">500m</div>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section id="hero">
+        <div class="stars" id="starsContainer"></div>
+        <div class="cloud-layer" id="heroCloudLayer"></div>
+        
+        <div class="hero-content">
+            <h1>Vanuit de Lucht</h1>
+            <p class="hero-subtitle">PROFESSIONELE DRONESERVICES</p>
+            <div class="drone-container">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Rotor ellipses -->
+                    <ellipse cx="15" cy="15" rx="8" ry="4" fill="none" stroke="#5bc4f5" stroke-width="1.5" opacity="0.8"/>
+                    <ellipse cx="85" cy="15" rx="8" ry="4" fill="none" stroke="#5bc4f5" stroke-width="1.5" opacity="0.8"/>
+                    <ellipse cx="15" cy="85" rx="8" ry="4" fill="none" stroke="#5bc4f5" stroke-width="1.5" opacity="0.8"/>
+                    <ellipse cx="85" cy="85" rx="8" ry="4" fill="none" stroke="#5bc4f5" stroke-width="1.5" opacity="0.8"/>
+
+                    <!-- Arms -->
+                    <line x1="50" y1="50" x2="15" y2="15" stroke="#1a7abf" stroke-width="2"/>
+                    <line x1="50" y1="50" x2="85" y2="15" stroke="#1a7abf" stroke-width="2"/>
+                    <line x1="50" y1="50" x2="15" y2="85" stroke="#1a7abf" stroke-width="2"/>
+                    <line x1="50" y1="50" x2="85" y2="85" stroke="#1a7abf" stroke-width="2"/>
+
+                    <!-- Body -->
+                    <rect x="40" y="45" width="20" height="15" rx="3" fill="#041830" stroke="#5bc4f5" stroke-width="1.5"/>
+
+                    <!-- Camera -->
+                    <circle cx="50" cy="62" r="4" fill="none" stroke="#5bc4f5" stroke-width="1.5"/>
+                    <circle cx="50" cy="62" r="2" fill="#5bc4f5" opacity="0.6"/>
+
+                    <!-- LEDs -->
+                    <circle cx="45" cy="45" r="2" fill="#5bc4f5">
+                        <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="55" cy="45" r="2" fill="#5bc4f5">
+                        <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- WAVE DIVIDER 1 -->
+    <svg class="wave" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,60 Q300,0 600,60 T1200,60 L1200,120 L0,120 Z" fill="#0a3d6b"/>
+    </svg>
+
+    <!-- ABOUT SECTION -->
+    <section id="about">
+        <div class="cloud-layer" id="aboutCloudLayer"></div>
+        
+        <h2 class="reveal">Over AeroDrone</h2>
+        
+        <div class="about-container">
+            <div>
+                <div class="stats-grid">
+                    <div class="stat-card reveal">
+                        <div class="stat-number">350+</div>
+                        <div class="stat-label">Vluchten Voltooid</div>
+                    </div>
+                    <div class="stat-card reveal">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Gecertificeerde Piloten</div>
+                    </div>
+                    <div class="stat-card reveal">
+                        <div class="stat-number">99%</div>
+                        <div class="stat-label">Klanttevredenheid</div>
+                    </div>
+                    <div class="stat-card reveal">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Dronemodellen</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drone-ring-container">
+                <div class="drone-ring reveal">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="25" cy="25" rx="8" ry="4" fill="none" stroke="#5bc4f5" stroke-width="1.5" opacity="0.8"/>
+                        <ellipse cx="75" cy="25" rx="8" ry="4" fill="none" stroke="#5bc4f5" stroke-width="1.5" opacity="0.8"/>
+                        <ellipse cx="25" cy="75" rx="8" ry="4" fill="none" stroke="#5bc4f5" stroke-width="1.5" opacity="0.8"/>
+                        <ellipse cx="75" cy="75" rx="8" ry="4" fill="none" stroke="#5bc4f5" stroke-width="1.5" opacity="0.8"/>
+                        <line x1="50" y1="50" x2="25" y2="25" stroke="#1a7abf" stroke-width="2"/>
+                        <line x1="50" y1="50" x2="75" y2="25" stroke="#1a7abf" stroke-width="2"/>
+                        <line x1="50" y1="50" x2="25" y2="75" stroke="#1a7abf" stroke-width="2"/>
+                        <line x1="50" y1="50" x2="75" y2="75" stroke="#1a7abf" stroke-width="2"/>
+                        <rect x="42" y="47" width="16" height="12" rx="2" fill="#041830" stroke="#5bc4f5" stroke-width="1.5"/>
+                        <circle cx="50" cy="61" r="3" fill="none" stroke="#5bc4f5" stroke-width="1.5"/>
+                        <circle cx="50" cy="61" r="1.5" fill="#5bc4f5" opacity="0.6"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WAVE DIVIDER 2 -->
+    <svg class="wave" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,60 Q300,0 600,60 T1200,60 L1200,120 L0,120 Z" fill="#1a7abf"/>
+    </svg>
+
+    <!-- SERVICES SECTION -->
+    <section id="services">
+        <div class="cloud-layer" id="servicesCloudLayer"></div>
+        
+        <h2 class="reveal">Onze Diensten</h2>
+        
+        <div class="services-grid">
+            <div class="service-card reveal">
+                <div class="service-icon">📸</div>
+                <h3>Luchtfotografie</h3>
+                <p>Professionele luchtfoto's en video's voor real estate, marketing en evenementen.</p>
+            </div>
+            <div class="service-card reveal">
+                <div class="service-icon">🔍</div>
+                <h3>Inspectie Infrastructuur</h3>
+                <p>Veilige inspectie van daken, torens, bruggen en andere hoge structuren.</p>
+            </div>
+            <div class="service-card reveal">
+                <div class="service-icon">🗺️</div>
+                <h3>3D Mapping</h3>
+                <p>Gedetailleerde 3D-modellen en orthofoto's voor planning en analyse.</p>
+            </div>
+            <div class="service-card reveal">
+                <div class="service-icon">🌾</div>
+                <h3>Precisie Landbouw</h3>
+                <p>Multispectrale analyse en crop health monitoring met geavanceerde sensoren.</p>
+            </div>
+            <div class="service-card reveal">
+                <div class="service-icon">🌡️</div>
+                <h3>Thermische Inspectie</h3>
+                <p>Infrarood thermografie voor energie-audits en technische diagnoses.</p>
+            </div>
+            <div class="service-card reveal">
+                <div class="service-icon">✈️</div>
+                <h3>Drone Training</h3>
+                <p>Gecertificeerde opleidingen voor commerciële piloten en operators.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- WAVE DIVIDER 3 -->
+    <svg class="wave" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,60 Q300,0 600,60 T1200,60 L1200,120 L0,120 Z" fill="#5bc4f5"/>
+    </svg>
+
+    <!-- PORTFOLIO SECTION -->
+    <section id="portfolio">
+        <h2 class="reveal">Portfolio</h2>
+        
+        <div class="portfolio-grid">
+            <!-- Large card 1 -->
+            <div class="portfolio-card reveal">
+                <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1a7abf;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#041830;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="400" height="200" fill="url(#grad1)"/>
+                    <rect x="50" y="40" width="300" height="120" fill="none" stroke="#5bc4f5" stroke-width="2" rx="10"/>
+                    <circle cx="200" cy="100" r="30" fill="none" stroke="#5bc4f5" stroke-width="1.5" opacity="0.6"/>
+                    <path d="M 100 100 L 200 60 L 300 100" fill="none" stroke="#87ceeb" stroke-width="2"/>
+                </svg>
+                <div class="portfolio-overlay">
+                    <div class="portfolio-title">Drone Lidar Survey</div>
+                    <div class="portfolio-category">3D MAPPING</div>
+                </div>
+            </div>
+
+            <!-- Normal cards -->
+            <div class="portfolio-card reveal">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="grad2">
+                            <stop offset="0%" style="stop-color:#5bc4f5;stop-opacity:0.8" />
+                            <stop offset="100%" style="stop-color:#041830;stop-opacity:1" />
+                        </radialGradient>
+                    </defs>
+                    <circle cx="100" cy="100" r="80" fill="url(#grad2)"/>
+                    <circle cx="80" cy="80" r="15" fill="none" stroke="#daeeff" stroke-width="2"/>
+                    <circle cx="120" cy="120" r="15" fill="none" stroke="#daeeff" stroke-width="2"/>
+                </svg>
+                <div class="portfolio-overlay">
+                    <div class="portfolio-title">Gebouw Inspectie</div>
+                    <div class="portfolio-category">INSPECTIE</div>
+                </div>
+            </div>
+
+            <div class="portfolio-card reveal">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="grad3" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#87ceeb;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#1a7abf;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="100,30 170,170 30,170" fill="url(#grad3)"/>
+                    <line x1="100" y1="30" x2="100" y2="170" stroke="#daeeff" stroke-width="1.5"/>
+                    <circle cx="100" cy="100" r="20" fill="none" stroke="#daeeff" stroke-width="2"/>
+                </svg>
+                <div class="portfolio-overlay">
+                    <div class="portfolio-title">Landbouw Monitoring</div>
+                    <div class="portfolio-category">AGRICULTURA</div>
+                </div>
+            </div>
+
+            <div class="portfolio-card reveal">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#5bc4f5;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#041830;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect x="30" y="50" width="140" height="100" fill="url(#grad4)" rx="20"/>
+                    <circle cx="70" cy="100" r="15" fill="none" stroke="#daeeff" stroke-width="2"/>
+                    <circle cx="130" cy="100" r="15" fill="none" stroke="#daeeff" stroke-width="2"/>
+                </svg>
+                <div class="portfolio-overlay">
+                    <div class="portfolio-title">Thermografie</div>
+                    <div class="portfolio-category">THERMAL</div>
+                </div>
+            </div>
+
+            <!-- Large card 2 -->
+            <div class="portfolio-card reveal">
+                <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="grad5" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#041830;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#1a7abf;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="400" height="200" fill="url(#grad5)"/>
+                    <circle cx="100" cy="100" r="40" fill="none" stroke="#5bc4f5" stroke-width="2"/>
+                    <circle cx="300" cy="100" r="40" fill="none" stroke="#5bc4f5" stroke-width="2"/>
+                    <line x1="140" y1="100" x2="260" y2="100" stroke="#87ceeb" stroke-width="2"/>
+                </svg>
+                <div class="portfolio-overlay">
+                    <div class="portfolio-title">Event Coverage</div>
+                    <div class="portfolio-category">FOTOGRAFIE</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WAVE DIVIDER 4 -->
+    <svg class="wave" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,60 Q300,0 600,60 T1200,60 L1200,120 L0,120 Z" fill="#87ceeb"/>
+    </svg>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact">
+        <h2 class="reveal">Neem Contact Op</h2>
+        
+        <div class="contact-container">
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label for="name">NAAM *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-MAIL *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="subject">ONDERWERP *</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">BERICHT *</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">VERZEND BERICHT</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2026 AeroDrone. Alle rechten voorbehouden. | Vanuit de Lucht</p>
+    </footer>
+
+    <script>
+        // ========== STARS BACKGROUND ==========
+        function createStars() {
+            const starsContainer = document.getElementById('starsContainer');
+            const starCount = 80;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // ========== CLOUD GENERATION ==========
+        function createCloud(speed, opacity, blur, size = 60) {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            cloud.style.left = Math.random() * 100 + '%';
+            cloud.style.top = Math.random() * 100 + '%';
+            cloud.style.width = size + 'px';
+            cloud.style.height = (size * 0.6) + 'px';
+            cloud.style.opacity = opacity;
+            cloud.style.filter = `blur(${blur}px)`;
+            cloud.style.animationDuration = speed + 's';
+            cloud.style.animation = `drift ${speed}s linear infinite`;
+
+            // Create bumps
+            const bump1 = document.createElement('div');
+            bump1.className = 'cloud-bump';
+            bump1.style.width = (size * 0.4) + 'px';
+            bump1.style.height = (size * 0.4) + 'px';
+            bump1.style.left = (size * 0.15) + 'px';
+            bump1.style.top = -(size * 0.2) + 'px';
+            bump1.style.background = 'var(--cloud-white)';
+
+            const bump2 = document.createElement('div');
+            bump2.className = 'cloud-bump';
+            bump2.style.width = (size * 0.5) + 'px';
+            bump2.style.height = (size * 0.5) + 'px';
+            bump2.style.left = (size * 0.4) + 'px';
+            bump2.style.top = -(size * 0.25) + 'px';
+            bump2.style.background = 'var(--cloud-white)';
+
+            cloud.appendChild(bump1);
+            cloud.appendChild(bump2);
+
+            return cloud;
+        }
+
+        function populateClouds(containerId, count) {
+            const container = document.getElementById(containerId);
+            for (let i = 0; i < count; i++) {
+                const speed = 15 + Math.random() * 20;
+                const opacity = 0.3 + Math.random() * 0.4;
+                const blur = 2 + Math.random() * 4;
+                const size = 50 + Math.random() * 80;
+                container.appendChild(createCloud(speed, opacity, blur, size));
+            }
+        }
+
+        // ========== SCROLL EVENTS ==========
+        const navbar = document.getElementById('navbar');
+        const altitudeTrack = document.querySelector('.altitude-fill');
+        const altitudeValue = document.querySelector('.altitude-value');
+        const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+        window.addEventListener('scroll', () => {
+            // Nav background on scroll
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            // Altitude indicator
+            const scrollPercent = window.scrollY / documentHeight;
+            const altitude = Math.max(0, 500 - scrollPercent * 500);
+            altitudeTrack.style.height = (scrollPercent * 100) + '%';
+            altitudeValue.textContent = Math.round(altitude) + 'm';
+
+            // Parallax drone
+            const heroSection = document.getElementById('hero');
+            const droneContainer = document.querySelector('.drone-container');
+            const heroOffset = heroSection.offsetTop;
+            const distance = window.scrollY - heroOffset;
+            if (distance < window.innerHeight) {
+                const parallax = distance * 0.5;
+                const opacity = Math.max(0, 1 - distance / window.innerHeight);
+                droneContainer.style.transform = `translateY(${parallax}px) rotateZ(0deg)`;
+                droneContainer.style.opacity = opacity;
+            }
+
+            // Reveal animations
+            revealOnScroll();
+        });
+
+        // ========== REVEAL ON SCROLL ==========
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.reveal, .stat-card, .service-card, .drone-ring, .portfolio-card');
+            reveals.forEach((element) => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        // ========== FORM SUBMISSION ==========
+        const contactForm = document.getElementById('contactForm');
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const btn = contactForm.querySelector('.submit-btn');
+            const originalText = btn.textContent;
+            
+            btn.textContent = '✓ BERICHT VERZONDEN';
+            btn.classList.add('success');
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('success');
+                btn.disabled = false;
+                contactForm.reset();
+            }, 3000);
+        });
+
+        // ========== INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            populateClouds('heroCloudLayer', 12);
+            populateClouds('aboutCloudLayer', 8);
+            populateClouds('servicesCloudLayer', 6);
+            revealOnScroll();
+        });
+    </script>
+</body>
+</html>
